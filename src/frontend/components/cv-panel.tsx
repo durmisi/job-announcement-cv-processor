@@ -9,26 +9,54 @@ import { Button } from "@/components/ui/button";
 interface CVPanelProps {
   content: string;
   fileName: string | null;
+  file: File | null;
   onContentChange: (content: string, fileName: string | null) => void;
+  onFileChange: (file: File | null) => void;
 }
 
-export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
+export function CVPanel({
+  content,
+  fileName,
+  file,
+  onContentChange,
+  onFileChange,
+}: CVPanelProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const processFile = useCallback(
     async (file: File) => {
       setIsProcessing(true);
       try {
-        const text = await file.text();
+        let text = "";
+        if (file.type === "application/pdf") {
+          const pdfjs = await import("pdfjs-dist");
+          pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            text +=
+              textContent.items.map((item: any) => item.str).join(" ") + "\n";
+          }
+          setPdfUrl(URL.createObjectURL(file));
+        } else {
+          text = await file.text();
+        }
         onContentChange(text, file.name);
-      } catch {
-        console.error("Error reading file");
+        onFileChange(file);
+      } catch (error) {
+        console.error("Error reading file", error);
+        // Fallback to empty
+        onContentChange("", file.name);
+        onFileChange(file);
       } finally {
         setIsProcessing(false);
       }
     },
-    [onContentChange],
+    [onContentChange, onFileChange],
   );
 
   const handleDrop = useCallback(
@@ -80,7 +108,12 @@ export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
 
   const clearFile = useCallback(() => {
     onContentChange("", null);
-  }, [onContentChange]);
+    onFileChange(null);
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(null);
+    }
+  }, [onContentChange, onFileChange, pdfUrl]);
 
   return (
     <div className="flex h-full flex-col">
@@ -163,13 +196,21 @@ export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <textarea
-              value={content}
-              onChange={(e) => onContentChange(e.target.value, fileName)}
-              className="flex-1 resize-none rounded-lg border border-border bg-secondary/50 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Or paste your CV content here..."
-              style={{ whiteSpace: "pre-wrap" }}
-            />
+            {pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                className="flex-1 rounded-lg border border-border"
+                title="CV PDF Viewer"
+              />
+            ) : (
+              <textarea
+                value={content}
+                onChange={(e) => onContentChange(e.target.value, fileName)}
+                className="flex-1 resize-none rounded-lg border border-border bg-secondary/50 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Or paste your CV content here..."
+                style={{ whiteSpace: "pre-wrap" }}
+              />
+            )}
           </div>
         )}
       </div>

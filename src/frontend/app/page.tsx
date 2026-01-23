@@ -11,6 +11,7 @@ export default function Home() {
   const [jobDescription, setJobDescription] = useState("");
   const [cvContent, setCvContent] = useState("");
   const [cvFileName, setCvFileName] = useState<string | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
@@ -20,26 +21,35 @@ export default function Home() {
     setCvFileName(fileName);
   };
 
-  const canAnalyze = jobDescription.trim() && cvContent.trim();
+  const handleFileChange = (file: File | null) => {
+    setCvFile(file);
+  };
+
+  const canAnalyze = jobDescription.trim() && cvContent.trim() && cvFile;
 
   const handleAnalyze = async () => {
-    if (!canAnalyze) return;
+    if (!canAnalyze || !cvFile) return; // Require file
 
     setIsAnalyzing(true);
     setShowAnalysis(true);
     setAnalysis(null);
 
     try {
+      const formData = new FormData();
+      formData.append("cv_file", cvFile);
+      formData.append("job_content", jobDescription);
+
       const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobDescription, cvContent }),
+        body: formData,
       });
 
       const data = await response.json();
 
-      if (!data.error) {
-        setAnalysis(data.analysis);
+      if (response.ok) {
+        setAnalysis("OK");
+      } else {
+        setAnalysis(data.detail || "An error occurred");
       }
     } catch {
       setAnalysis("An error occurred while analyzing. Please try again.");
@@ -85,7 +95,9 @@ export default function Home() {
           <CVPanel
             content={cvContent}
             fileName={cvFileName}
+            file={cvFile}
             onContentChange={handleCVChange}
+            onFileChange={handleFileChange}
           />
         </div>
       </div>
