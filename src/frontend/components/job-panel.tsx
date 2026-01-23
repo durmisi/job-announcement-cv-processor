@@ -27,7 +27,7 @@ export function JobPanel({ value, onChange }: JobPanelProps) {
     setError("");
 
     try {
-      const response = await fetch("/api/fetch-job", {
+      const response = await fetch("http://localhost:8002/fetch-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: url.trim() }),
