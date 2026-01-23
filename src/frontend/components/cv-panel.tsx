@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useCallback, useState } from "react";
 import { FileText, Upload, X, File } from "lucide-react";
@@ -28,7 +28,7 @@ export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
         setIsProcessing(false);
       }
     },
-    [onContentChange]
+    [onContentChange],
   );
 
   const handleDrop = useCallback(
@@ -55,7 +55,7 @@ export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
         }
       }
     },
-    [processFile]
+    [processFile],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -75,7 +75,7 @@ export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
         processFile(file);
       }
     },
-    [processFile]
+    [processFile],
   );
 
   const clearFile = useCallback(() => {
@@ -168,6 +168,7 @@ export function CVPanel({ content, fileName, onContentChange }: CVPanelProps) {
               onChange={(e) => onContentChange(e.target.value, fileName)}
               className="flex-1 resize-none rounded-lg border border-border bg-secondary/50 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Or paste your CV content here..."
+              style={{ whiteSpace: "pre-wrap" }}
             />
           </div>
         )}

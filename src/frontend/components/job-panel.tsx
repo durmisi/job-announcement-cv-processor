@@ -151,6 +151,7 @@ Example:
               : "Fetched content will appear here. You can edit it after fetching."
           }
           className="h-full w-full flex-1 resize-none rounded-lg border border-border bg-secondary/50 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          style={{ whiteSpace: "pre-wrap" }}
         />
       </div>
     </div>

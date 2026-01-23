@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import requests
 from bs4 import BeautifulSoup
 import re
+import html2text
 
 app = FastAPI(
     title="Job Announcement CV Processor API",
@@ -38,13 +39,17 @@ def fetch_job(request: FetchJobRequest):
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
+        response.encoding = 'utf-8'  # Force UTF-8 encoding
+        soup = BeautifulSoup(response.text, 'html.parser')
         # Remove scripts and styles
         for script in soup(["script", "style"]):
             script.decompose()
-        text = soup.get_text()
-        # Clean up whitespace
-        text = re.sub(r'\s+', ' ', text).strip()
+        # Convert to markdown
+        h = html2text.HTML2Text()
+        h.ignore_links = False
+        h.ignore_images = True
+        h.ignore_tables = False
+        text = h.handle(str(soup)).strip()
         return {"content": text}
     except requests.RequestException as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch URL: {str(e)}")
