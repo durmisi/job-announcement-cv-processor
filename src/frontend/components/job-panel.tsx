@@ -27,11 +27,14 @@ export function JobPanel({ value, onChange }: JobPanelProps) {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8002/fetch-job", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/fetch-job`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url.trim() }),
+        },
+      );
 
       const data = await response.json();
 
