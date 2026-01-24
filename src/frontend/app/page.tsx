@@ -12,7 +12,7 @@ export default function Home() {
   const [cvContent, setCvContent] = useState("");
   const [cvFileName, setCvFileName] = useState<string | null>(null);
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisData | string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
 
@@ -47,7 +47,7 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        setAnalysis("OK");
+        setAnalysis(data.analysis);
       } else {
         setAnalysis(data.detail || "An error occurred");
       }

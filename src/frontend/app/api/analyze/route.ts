@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const data = await response.json();
 
     if (response.ok) {
-      return Response.json({ analysis: data.message });
+      return Response.json({ analysis: data });
     } else {
       return Response.json({ error: data.detail || "Backend error" }, { status: response.status });
     }

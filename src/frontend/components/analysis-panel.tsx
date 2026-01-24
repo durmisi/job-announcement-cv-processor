@@ -29,7 +29,7 @@ export interface AnalysisData {
 }
 
 interface AnalysisPanelProps {
-  analysis: AnalysisData | null;
+  analysis: AnalysisData | string | null;
   isLoading: boolean;
   onClose: () => void;
 }
@@ -77,7 +77,7 @@ function ScoreGauge({ score }: { score: number }) {
             strokeDashoffset={strokeDashoffset}
             className={cn(
               "transition-all duration-1000 ease-out",
-              getScoreColor(score)
+              getScoreColor(score),
             )}
           />
         </svg>
@@ -115,7 +115,7 @@ function SkillBadge({
     <div
       className={cn(
         "flex items-center gap-2 rounded-lg border px-3 py-2",
-        styles[skill.status]
+        styles[skill.status],
       )}
     >
       {icons[skill.status]}
@@ -142,7 +142,7 @@ function ProgressBar({ value, label }: { value: number; label: string }) {
         <div
           className={cn(
             "h-full rounded-full transition-all duration-700 ease-out",
-            getColor(value)
+            getColor(value),
           )}
           style={{ width: `${value}%` }}
         />
@@ -200,11 +200,15 @@ export function AnalysisPanel({
                 </p>
               </div>
             </div>
+          ) : typeof analysis === "string" ? (
+            <div className="p-6 text-center text-muted-foreground">
+              {analysis}
+            </div>
           ) : analysis ? (
             <div className="p-6">
               {/* Score and Summary */}
               <div className="mb-8 flex flex-col items-center gap-6 rounded-xl bg-secondary/50 p-6 md:flex-row md:items-start">
-                <ScoreGauge score={analysis.score} />
+                <div>Score: {analysis.score}</div>
                 <div className="flex-1 text-center md:text-left">
                   <h3 className="mb-2 text-lg font-semibold text-foreground">
                     Summary
