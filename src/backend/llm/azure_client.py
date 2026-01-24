@@ -8,10 +8,11 @@ class AzureOpenAIClient(LLMClient):
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
             base_url=os.getenv("AZURE_OPENAI_BASE_URL", "https://your-resource.openai.azure.com/openai/v1/")
         )
+        self.model = os.getenv("LLM_MODEL", "gpt-4o")
 
     def generate_response(self, prompt: str) -> str:
         response = self.client.chat.completions.create(
-            model="gpt-4o",  # Deployment name
+            model=self.model,  # Deployment name
             messages=[{"role": "user", "content": prompt}],
             max_tokens=500
         )

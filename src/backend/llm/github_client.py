@@ -9,11 +9,12 @@ class GitHubModelsClient(LLMClient):
             endpoint="https://models.inference.ai.azure.com",
             credential=AzureKeyCredential(os.getenv("GITHUB_TOKEN"))
         )
+        self.model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
     def generate_response(self, prompt: str) -> str:
         response = self.client.complete(
             messages=[{"role": "user", "content": prompt}],
-            model="gpt-4o-mini"  # Using GPT-4-turbo for 128k context
+            model=self.model
         )
         return response.choices[0].message.content
 

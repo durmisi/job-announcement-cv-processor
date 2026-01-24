@@ -5,10 +5,11 @@ from . import LLMClient
 class OpenAIClient(LLMClient):
     def __init__(self):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.model = os.getenv("LLM_MODEL", "gpt-4o")
 
     def generate_response(self, prompt: str) -> str:
         response = self.client.chat.completions.create(
-            model="gpt-4o",
+            model=self.model,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=500
         )
