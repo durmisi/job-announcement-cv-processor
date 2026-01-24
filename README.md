@@ -5,7 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green)](https://fastapi.tiangolo.com/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-API-blue)](https://openai.com/)
 
-An innovative AI-powered web application that revolutionizes job searching by analyzing CV compatibility with job announcements. Built to showcase cutting-edge AI integration and modern web development skills, this open-source tool empowers job seekers with data-driven insights, helping them tailor applications and boost success rates.
+An AI-powered web application that analyzes CV compatibility with job announcements. This open-source tool provides data-driven insights to help job seekers tailor their applications and improve their success rates.
 
 ![Application Screenshot](docs/home.png)
 
