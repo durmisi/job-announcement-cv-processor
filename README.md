@@ -7,6 +7,8 @@
 
 An innovative AI-powered web application that revolutionizes job searching by analyzing CV compatibility with job announcements. Built to showcase cutting-edge AI integration and modern web development skills, this open-source tool empowers job seekers with data-driven insights, helping them tailor applications and boost success rates.
 
+![Application Screenshot](docs/home.png)
+
 ## 🚀 Core Idea
 
 In today's competitive job market, matching your CV to specific job requirements can make or break your application. The Job Announcement CV Processor automates this process using advanced large language models (LLMs) to provide:
