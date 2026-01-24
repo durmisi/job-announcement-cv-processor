@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 import json
 import logging
+import mimetypes
+import re
 from llm.factory import get_llm_client
+from utils.text_extraction import extract_text_from_file
 
 router = APIRouter()
 
@@ -14,10 +17,16 @@ async def analyze_cv(cv_file: UploadFile = File(...), job_content: str = Form(..
     if not job_content.strip():
         raise HTTPException(status_code=400, detail="Job content is required")
     
-    # Read CV content
-    cv_content = (await cv_file.read()).decode("utf-8")
+    file_bytes = await cv_file.read()
+    mime_type = mimetypes.guess_type(cv_file.filename)[0]
+    if mime_type is None:
+        raise HTTPException(status_code=400, detail="Could not determine file type")
+    try:
+        cv_content = extract_text_from_file(file_bytes, mime_type)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
-    logger.info(f"Received CV file: {cv_file.filename}, size: {len(cv_content)} bytes")
+    logger.info(f"Received CV file: {cv_file.filename}, size: {len(cv_content)} bytes, type: {mime_type}")
     logger.info(f"Job content length: {len(job_content)}")
     
     # Create prompt for LLM
@@ -48,7 +57,18 @@ Ensure the response is valid JSON.
         client = get_llm_client()
         logger.info("Calling LLM for analysis")
         response = client.generate_response(prompt)
+        logger.info(f"LLM response: {response}")
         logger.info("LLM response received, parsing JSON")
+        
+        # Extract JSON from markdown code block if present
+        json_match = re.search(r'```json\s*(\{.*\})\s*```', response, re.DOTALL)
+        if json_match:
+            response = json_match.group(1)
+        elif response.startswith('```json'):
+            response = response[7:].strip()
+            if response.endswith('```'):
+                response = response[:-3].strip()
+        
         analysis = json.loads(response)
         logger.info(f"Analysis completed with score: {analysis.get('score', 'N/A')}")
         return analysis
