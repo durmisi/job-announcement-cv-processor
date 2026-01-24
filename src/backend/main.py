@@ -1,6 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+import logging
 import os
+import time
 from dotenv import load_dotenv
 from routes.root import router as root_router
 from routes.fetch_job import router as fetch_job_router
@@ -9,12 +12,38 @@ from llm.factory import get_llm_client
 
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG if os.getenv("DEBUG", "false").lower() == "true" else logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        logger.info(f"Request: {request.method} {request.url}")
+        try:
+            response = await call_next(request)
+            process_time = time.time() - start_time
+            logger.info(f"Response: {response.status_code} in {process_time:.4f}s")
+            return response
+        except Exception as e:
+            process_time = time.time() - start_time
+            logger.error(f"Error in request {request.method} {request.url}: {str(e)} in {process_time:.4f}s")
+            raise
+
 app = FastAPI(
     title="Job Announcement CV Processor API",
     description="A minimal FastAPI backend for processing job announcements and CVs",
     version="1.0.0"
 )
 
+app.add_middleware(LoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:3001"],  # Frontend URLs
@@ -28,9 +57,9 @@ def validate_llm_config():
     provider = os.getenv("LLM_PROVIDER", "ollama")
     try:
         client = get_llm_client(provider)
-        print(f"LLM provider '{provider}' configured successfully.")
+        logger.info(f"LLM provider '{provider}' configured successfully.")
     except Exception as e:
-        print(f"Warning: LLM provider '{provider}' configuration failed: {e}")
+        logger.warning(f"LLM provider '{provider}' configuration failed: {e}")
 
 app.include_router(root_router)
 app.include_router(fetch_job_router)
