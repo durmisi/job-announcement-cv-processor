@@ -99,6 +99,120 @@ Execute the start script to launch both services:
 
 The script activates the Python virtual environment and runs servers in separate terminals.
 
+## ⚙️ Configuration
+
+This application requires configuration through environment variables for both frontend and backend components. Create the appropriate `.env` files in the respective directories as described below.
+
+### Backend Configuration (`src/backend/.env`)
+
+The backend uses a `.env` file to configure LLM providers, CORS settings, and other options. Create `src/backend/.env` with the following variables:
+
+#### Required Variables
+
+- **`LLM_PROVIDER`**: Specifies which LLM service to use. Options:
+  - `ollama` (default): Uses local Ollama instance
+  - `openai`: Uses OpenAI API
+  - `azure`: Uses Azure OpenAI service
+  - `github`: Uses GitHub Models
+
+#### Provider-Specific Variables
+
+Depending on the `LLM_PROVIDER`, configure the following:
+
+**For OpenAI (`LLM_PROVIDER=openai`):**
+
+- `OPENAI_API_KEY`: Your OpenAI API key (required)
+
+**For Azure OpenAI (`LLM_PROVIDER=azure`):**
+
+- `AZURE_OPENAI_API_KEY`: Your Azure OpenAI API key (required)
+- `AZURE_OPENAI_BASE_URL`: Your Azure OpenAI endpoint URL (required, e.g., `https://your-resource.openai.azure.com/openai/v1/`)
+
+**For GitHub Models (`LLM_PROVIDER=github`):**
+
+- `GITHUB_TOKEN`: Your GitHub personal access token with Models API access (required)
+
+**For Ollama (`LLM_PROVIDER=ollama`):**
+
+- `OLLAMA_BASE_URL`: Ollama server URL (default: `http://localhost:11434`)
+
+#### Optional Variables
+
+- **`LLM_MODEL`**: The model name to use (defaults vary by provider):
+  - OpenAI/Azure: `gpt-4o`
+  - GitHub: `gpt-4o-mini`
+  - Ollama: `deepseek-r1:8b`
+- **`DEBUG`**: Enable debug logging (`true`/`false`, default: `false`)
+- **`CORS_ORIGINS`**: Comma-separated list of allowed origins (default: `http://localhost:3000,http://localhost:3001`)
+
+#### Example `.env` Files
+
+**Ollama (default):**
+
+```env
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+LLM_MODEL=deepseek-r1:8b
+DEBUG=false
+```
+
+**OpenAI:**
+
+```env
+LLM_PROVIDER=openai
+OPENAI_API_KEY=your_openai_api_key_here
+LLM_MODEL=gpt-4o
+DEBUG=false
+```
+
+**Azure OpenAI:**
+
+```env
+LLM_PROVIDER=azure
+AZURE_OPENAI_API_KEY=your_azure_api_key_here
+AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/openai/v1/
+LLM_MODEL=gpt-4o
+DEBUG=false
+```
+
+**GitHub Models:**
+
+```env
+LLM_PROVIDER=github
+GITHUB_TOKEN=your_github_token_here
+LLM_MODEL=gpt-4o-mini
+DEBUG=false
+```
+
+### Frontend Configuration (`src/frontend/.env.local`)
+
+The frontend requires configuration for the backend API endpoint. Create `src/frontend/.env.local` with:
+
+- **`NEXT_PUBLIC_BACKEND_URL`**: URL of the backend API (default: `http://localhost:8000`)
+
+Example:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+```
+
+### Setup Instructions
+
+1. **For Ollama users** (recommended for local development):
+   - Install Ollama from [ollama.ai](https://ollama.ai)
+   - Pull a model: `ollama pull deepseek-r1:8b`
+   - Use the default `.env` configuration
+
+2. **For cloud LLM users**:
+   - Obtain API keys from your provider
+   - Create the appropriate `.env` file as shown above
+   - Ensure your account has sufficient credits/permissions
+
+3. **Environment Variables**:
+   - Backend: Copy the example above to `src/backend/.env`
+   - Frontend: Copy the example above to `src/frontend/.env.local`
+   - Never commit `.env` files to version control
+
 ## 📖 Usage
 
 1. Open the app in your browser.
