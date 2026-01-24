@@ -13,7 +13,7 @@ class GitHubModelsClient(LLMClient):
     def generate_response(self, prompt: str) -> str:
         response = self.client.complete(
             messages=[{"role": "user", "content": prompt}],
-            model="gpt-4o"  # Or specific model
+            model="gpt-4o-mini"  # Using GPT-4-turbo for 128k context
         )
         return response.choices[0].message.content
 

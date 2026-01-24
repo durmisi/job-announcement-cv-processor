@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from playwright.sync_api import sync_playwright
+from llm.factory import get_llm_client
 
 router = APIRouter()
 
@@ -25,10 +26,24 @@ def fetch_job(request: FetchJobRequest):
             page.wait_for_load_state('networkidle', timeout=5000)
             
             # Get the full HTML content after all loading
-            content = page.content()
+            content = page.locator('body').inner_html()
             browser.close()
         
-        return {"content": content}
+        # Truncate content if too long (approx 4000 tokens ~ 16k chars for grok-code-fast-1)
+        if len(content) > 15000:
+            content = content[:15000] + "... (content truncated for processing)"
+        
+        # Use LLM to extract job announcement as markdown
+        client = get_llm_client()
+        prompt = f"""
+Extract the main job announcement content from the following HTML page. Focus on the job description, requirements, responsibilities, and company details. Remove headers, footers, navigation menus, ads, sidebars, and any unrelated content. Return the extracted content as clean, readable markdown. If the content is truncated, extract as much as possible from the provided portion. If no clear job announcement is found, return an empty string.
+
+HTML:
+{content}
+"""
+        extracted_content = client.generate_response(prompt)
+        
+        return {"content": extracted_content}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch or process URL: {str(e)}")
 
