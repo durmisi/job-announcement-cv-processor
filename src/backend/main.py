@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
 from routes.root import router as root_router
 from routes.fetch_job import router as fetch_job_router
 from routes.analyze import router as analyze_router
+from llm.factory import get_llm_client
+
+load_dotenv()
 
 app = FastAPI(
     title="Job Announcement CV Processor API",
@@ -17,6 +22,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+def validate_llm_config():
+    provider = os.getenv("LLM_PROVIDER", "ollama")
+    try:
+        client = get_llm_client(provider)
+        print(f"LLM provider '{provider}' configured successfully.")
+    except Exception as e:
+        print(f"Warning: LLM provider '{provider}' configuration failed: {e}")
 
 app.include_router(root_router)
 app.include_router(fetch_job_router)
