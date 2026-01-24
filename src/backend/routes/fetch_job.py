@@ -26,19 +26,15 @@ def fetch_job(request: FetchJobRequest):
             page.wait_for_load_state('networkidle', timeout=5000)
             
             # Get the full HTML content after all loading
-            content = page.locator('body').inner_html()
+            content = page.locator('body').text_content()
             browser.close()
-        
-        # Truncate content if too long (approx 4000 tokens ~ 16k chars for grok-code-fast-1)
-        if len(content) > 15000:
-            content = content[:15000] + "... (content truncated for processing)"
         
         # Use LLM to extract job announcement as markdown
         client = get_llm_client()
         prompt = f"""
-Extract the main job announcement content from the following HTML page. Focus on the job description, requirements, responsibilities, and company details. Remove headers, footers, navigation menus, ads, sidebars, and any unrelated content. Return the extracted content as clean, readable markdown. If the content is truncated, extract as much as possible from the provided portion. If no clear job announcement is found, return an empty string.
+Extract the main job announcement content from the webpage text provided below. Remove headers, footers, navigation, ads, and any unrelated content. Output the extracted content as clean Markdown, preserving the original structure, language, and formatting without reorganizing or adding sections. Do not summarize or shorten; provide the full extracted content.
 
-HTML:
+CONTENT INPUT:
 {content}
 """
         extracted_content = client.generate_response(prompt)
