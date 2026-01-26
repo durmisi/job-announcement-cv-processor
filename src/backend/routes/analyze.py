@@ -5,6 +5,7 @@ import mimetypes
 import re
 from llm.factory import get_llm_client
 from utils.text_extraction import extract_text_from_file
+from langchain_core.messages import HumanMessage
 
 router = APIRouter()
 
@@ -56,7 +57,7 @@ Ensure the response is valid JSON.
     try:
         client = get_llm_client()
         logger.info("Calling LLM for analysis")
-        response = client.generate_response(prompt)
+        response = client.invoke([HumanMessage(content=prompt)]).content
         logger.info(f"LLM response: {response}")
         logger.info("LLM response received, parsing JSON")
         

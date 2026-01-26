@@ -1,20 +1,35 @@
 import os
-from .openai_client import OpenAIClient
-from .azure_client import AzureOpenAIClient
-from .ollama_client import OllamaClient
-from .github_client import GitHubModelsClient
+from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatOllama
 
 def get_llm_client(provider: str = None):
     if provider is None:
         provider = os.getenv("LLM_PROVIDER", "ollama").lower()
     if provider == "openai":
-        return OpenAIClient()
+        return ChatOpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            model=os.getenv("LLM_MODEL", "gpt-4o"),
+            max_tokens=2000
+        )
     elif provider == "azure":
-        return AzureOpenAIClient()
+        return ChatOpenAI(
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            base_url=os.getenv("AZURE_OPENAI_BASE_URL", "https://your-resource.openai.azure.com/openai/v1/"),
+            model=os.getenv("LLM_MODEL", "gpt-4o"),
+            max_tokens=2000
+        )
     elif provider == "ollama":
-        return OllamaClient()
+        return ChatOllama(
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+            model=os.getenv("LLM_MODEL", "deepseek-r1:8b")
+        )
     elif provider == "github":
-        return GitHubModelsClient()
+        return ChatOpenAI(
+            api_key=os.getenv("GITHUB_TOKEN"),
+            base_url="https://models.inference.ai.azure.com",
+            model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
+            max_tokens=2000
+        )
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")
 
