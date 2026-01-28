@@ -8,6 +8,9 @@
 An AI-powered web application that analyzes CV compatibility with job announcements. This open-source tool provides data-driven insights to help job seekers tailor their applications and improve their success rates.
 
 ![Application Screenshot](docs/home.png)
+![Application Screenshot](docs/summary1.png)
+![Application Screenshot](docs/summary2.png)
+![Application Screenshot](docs/summary3.png)
 
 ## 🚀 Core Idea
 
